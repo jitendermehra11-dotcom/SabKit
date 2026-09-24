@@ -17,14 +17,27 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-
-      - name: Generate Gradle Wrapper
-        run: gradle wrapper --gradle-version 8.5
-
-      - name: Build Debug APK with Gradle
+      - name: Find and Build Android Project
         run: |
+          # प्रोजेक्ट फाइल (settings.gradle या build.gradle) को ऑटोमैटिक ढूंढना
+          PROJECT_DIR=$(find . -name "settings.gradle" -o -name "settings.gradle.kts" -o -name "build.gradle" -o -name "build.gradle.kts" | head -n 1 | xargs dirname)
+          echo "Found project directory: $PROJECT_DIR"
+          
+          if [ -z "$PROJECT_DIR" ] || [ "$PROJECT_DIR" = "." ]; then
+            echo "Project root files:"
+            ls -la
+            exit 1
+          fi
+
+          cd "$PROJECT_DIR"
+          echo "Current directory: $(pwd)"
+          
+          # अगर gradlew न हो तो रैपर जनरेट करना
+          if [ ! -f "gradlew" ]; then
+            echo "Generating Gradle Wrapper..."
+            gradle wrapper --gradle-version 8.5
+          fi
+          
           chmod +x gradlew
           ./gradlew assembleDebug
 
@@ -32,4 +45,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: SabKit-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: '**/build/outputs/apk/debug/app-debug.apk'
