@@ -17,12 +17,20 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Build APK with Gradle
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew || true
+
+      - name: Build Debug APK with Gradle
         run: |
-          echo "include ':app'" > settings.gradle.kts
-          chmod +x gradlew || true
-          # Simple check and build simulation
-          echo "Building SabKit APK successfully initialized."
+          if [ -f "gradlew" ]; then
+            ./gradlew assembleDebug
+          else
+            gradle wrapper
+            ./gradlew assembleDebug
+          fi
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
