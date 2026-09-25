@@ -1,4 +1,4 @@
-package com.example.sabkit
+package com.jitendermehra.sabkit
 
 import android.os.Bundle
 import android.security.keystore.KeyGenParameterSpec
